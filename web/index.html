@@ -42,8 +42,50 @@
     <link rel="stylesheet" href="/static/css/app.css" type="text/css" />
     <link rel="stylesheet" href="/static/css/fonts.css" type="text/css" />
 
-    <!-- PWA -->
-    <link rel="manifest" href="/manifest.webmanifest" />
+    <script>
+      // Function to fetch the initial manifest data
+      async function getInitialManifestData() {
+        try {
+          const response = await fetch('/manifest.webmanifest');
+          if (response.ok) {
+            return await response.json();
+          } else {
+            console.error('Failed to fetch manifest data:', response.status);
+            return null;
+          }
+        } catch (error) {
+          console.error('Error fetching manifest data:', error);
+          return null;
+        }
+      }
+
+      // Function to generate the dynamic manifest
+      async function generateDynamicManifest() {
+        // Fetch the initial manifest data
+        const initialManifestData = await getInitialManifestData();
+        if (!initialManifestData) {
+          return;
+        }
+
+        // Update the start_url in the manifest data
+        const currentUrl = window.location.href;
+        const updatedManifestData = {
+          ...initialManifestData,
+          start_url: currentUrl,
+        };
+
+        // Create a new manifest element
+        const manifestElement = document.createElement('link');
+        manifestElement.rel = 'manifest';
+        manifestElement.href = 'data:application/manifest+json,' + encodeURIComponent(JSON.stringify(updatedManifestData));
+
+        // Append the manifest element to the HTML document
+        document.head.appendChild(manifestElement);
+      }
+
+      // Generate the dynamic manifest when the page loads
+      window.onload = generateDynamicManifest;
+    </script>
   </head>
   <body>
     <noscript>
